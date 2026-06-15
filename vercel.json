@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://tomato-leaf-disease-detection-1-19v1.onrender.com/api/:path*"
+        }
+    ]
+}
