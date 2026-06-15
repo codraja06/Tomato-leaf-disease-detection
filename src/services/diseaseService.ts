@@ -82,9 +82,23 @@ async function analyzeWithGemini(base64Image: string) {
   const responseText = response.text || "{}";
   const analysis = JSON.parse(responseText);
   
-  const matchedKey = Object.keys(DISEASE_METADATA).find(
-    key => key.toLowerCase() === (analysis.diseaseName || "").toLowerCase()
-  ) || "Healthy";
+  let matchedKey = "Healthy";
+  const normalizedResponse = (analysis.diseaseName || "").toLowerCase().trim();
+  if (
+    normalizedResponse.includes("not a tomato") ||
+    normalizedResponse.includes("no tomato") ||
+    normalizedResponse.includes("not tomato") ||
+    normalizedResponse.includes("non-tomato") ||
+    normalizedResponse.includes("invalid") ||
+    normalizedResponse.includes("other leaf") ||
+    normalizedResponse.includes("not a leaf")
+  ) {
+    matchedKey = "Not a Tomato Leaf";
+  } else {
+    matchedKey = Object.keys(DISEASE_METADATA).find(
+      key => key.toLowerCase() === normalizedResponse
+    ) || "Healthy";
+  }
 
   const metadata = DISEASE_METADATA[matchedKey];
   
