@@ -89,9 +89,9 @@ async function startServer() {
       const prompt = `You are a professional Tomato Crop Pathologist.
       Task: Identify the disease in the uploaded tomato leaf image.
       
-      Instructions:
-      1. First, verify if the image contains a tomato plant leaf. If not, return "Not a Tomato Leaf".
-      2. Analyze visual symptoms: spots, blights, molds, stippling, curling, or mosaic patterns.
+      CRITICAL INSTRUCTIONS:
+      1. First, verify if the image contains a tomato plant leaf. If the image does not contain a tomato plant leaf (for example, if it contains a leaf of another plant species like potato, grape, apple, weeds, etc., or if it contains any other object, person, animal, or scene), you MUST return "Not a Tomato Leaf" as the diseaseName. Do NOT identify diseases for any other plant leaves or objects.
+      2. If it is a tomato leaf, analyze visual symptoms: spots, blights, molds, stippling, curling, or mosaic patterns.
       3. Choose the MOST accurate category from this list only: [${validDiseases}].
       4. Provide a confidence score between 0.0 and 1.0.
       5. Provide a brief visual reasoning for your diagnosis.
