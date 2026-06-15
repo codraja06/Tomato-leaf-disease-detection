@@ -1,0 +1,6 @@
+{
+  "name": "TomatoGuard AI | Diagnostic System",
+  "description": "Multi-tier diagnostic pathology system for real-time tomato crop disease detection with offline neural core fallbacks.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
