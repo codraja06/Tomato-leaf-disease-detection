@@ -42,4 +42,4 @@ TomatoGuard is a high-performance web application designed to help farmers and g
     ```
 
 ---
-**Personalized for SANGEETH**
+
