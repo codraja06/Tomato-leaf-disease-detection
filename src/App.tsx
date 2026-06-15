@@ -1,7 +1,4 @@
-/**
- * 🍅 TomatoGuard: Professional Tomato Leaf Disease Detector
- * Reverting to the original state.
- */
+
 
 import React, { useState, useEffect } from "react";
 import { Camera, Upload, History as HistoryIcon, Leaf, AlertCircle, ChevronLeft, Shield, Sparkles, Users, RefreshCw } from "lucide-react";
@@ -25,7 +22,7 @@ export default function App() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
 
-  // Load history from localStorage
+ 
   useEffect(() => {
     const savedHistory = localStorage.getItem("tomato_history");
     if (savedHistory) {

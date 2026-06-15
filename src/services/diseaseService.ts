@@ -3,7 +3,6 @@ import { DISEASE_METADATA } from "../types";
 import * as tf from '@tensorflow/tfjs';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.ENGINE_API_KEY || "";
-// Lazy initialization: avoid creating SDK instance at module load if key is missing
 let _engine: GoogleGenAI | null = null;
 function getEngine(): GoogleGenAI {
   if (!_engine) {
@@ -19,8 +18,7 @@ async function loadModel() {
   try {
     console.group("🍅 TomatoGuard Diagnostic: Neural Core");
     console.log("Searching for local model at: /model/model.json");
-    
-    // Attempt to load a model if the user provides it in the future
+   
     localModel = await tf.loadLayersModel('/model/model.json');
     console.log("✅ Neural Core initialized successfully.");
     console.groupEnd();
@@ -55,7 +53,6 @@ async function analyzeWithGemini(base64Image: string) {
     "reasoning": "Observed concentric rings with yellow halos on older leaves..."
   }`;
 
-  // Safely extract raw base64 and real mimeType from data URL prefix
   let rawBase64 = base64Image;
   let detectedMimeType: string = "image/jpeg";
   if (base64Image.includes(";base64,")) {
@@ -107,7 +104,7 @@ async function analyzeWithLocalModel(base64Image: string) {
   if (!model) throw new Error("MODEL_NOT_FOUND_ON_DISK");
 
   try {
-    // Create a temporary image element to load the base64 data
+  
     const img = new Image();
     img.src = base64Image;
     
@@ -116,7 +113,7 @@ async function analyzeWithLocalModel(base64Image: string) {
       img.onerror = reject;
     });
 
-    // Process image for the model (assuming typical 224x224 input)
+
     const tensor = tf.tidy(() => {
       const imgTensor = tf.browser.fromPixels(img);
       const resized = tf.image.resizeBilinear(imgTensor, [224, 224]);
@@ -129,8 +126,6 @@ async function analyzeWithLocalModel(base64Image: string) {
     tensor.dispose();
     prediction.dispose();
 
-    // Map high probability to disease list
-    // This assumes your model's output layer matches the order of DISEASE_METADATA keys
     const diseaseKeys = Object.keys(DISEASE_METADATA);
     const maxIndex = data.indexOf(Math.max(...data));
     const matchedKey = diseaseKeys[maxIndex] || "Healthy";
@@ -154,8 +149,6 @@ async function analyzeWithLocalModel(base64Image: string) {
 }
 
 async function analyzeWithLocalDatabase(base64Image: string) {
-  // Tier 3: Heuristic-based fallback (Visual Property Analysis)
-  // We analyze the image colors to estimate the health status
   
   return new Promise((resolve) => {
     const img = new Image();
@@ -183,16 +176,16 @@ async function analyzeWithLocalDatabase(base64Image: string) {
         const g = imageData[i + 1];
         const b = imageData[i + 2];
 
-        // Green leaf detection
+        
         if (g > r && g > b) greenPixels++;
         
-        // Yellowing detection (broad range for chlorosis)
+       
         if (r > 130 && g > 130 && b < 140) yellowPixels++;
         
-        // Browning/Necrotic detection
+       
         if (r > 60 && g > 40 && b < 40 && r > g) brownPixels++;
 
-        // Dark spot detection (fungal identifiers)
+       
         if (r < 50 && g < 50 && b < 50 && (r+g+b) < 120) darkSpots++;
       }
 
@@ -205,7 +198,7 @@ async function analyzeWithLocalDatabase(base64Image: string) {
       let prediction: keyof typeof DISEASE_METADATA = "Healthy";
       let confidence = 0.55;
 
-      // Smart diagnostic heuristic based on leaf color distribution
+      
       if (greenRatio > 0.40 && spotRatio < 0.05 && brownRatio < 0.06 && yellowRatio < 0.10) {
         prediction = "Healthy";
         confidence = 0.88;
@@ -327,7 +320,7 @@ export async function analyzeLeaf(base64Image: string) {
     console.log("Skipping primary client-side Gemini call: client API key is not present.");
   }
 
-  // 2. Second: Backend secure proxy and offline local FastAPI endpoints on port 8000
+ 
   if (!result) {
     try {
       console.log("Tier 2: Accessing Backend Secure Diagnostics Proxy...");
@@ -350,9 +343,9 @@ export async function analyzeLeaf(base64Image: string) {
     }
   }
 
-  // 3. Third: Local offline devices models
+  
   if (!result) {
-    // Try local TensorFlow.js model first
+    
     try {
       console.log("Tier 3 (Local Core): Attempting local TensorFlow.js model analysis...");
       result = await analyzeWithLocalModel(base64Image);
@@ -360,7 +353,7 @@ export async function analyzeLeaf(base64Image: string) {
       console.warn("Tier 3 (Local Model) failed or not loaded on device:", modelError.message);
     }
 
-    // Fall back to local heuristic/database spectrum analysis if TF.js fails or is missing
+    
     if (!result) {
       try {
         console.log("Tier 3.5 (Local Database Heuristic): Executing local database heuristic visual spectrum analysis...");
@@ -372,19 +365,19 @@ export async function analyzeLeaf(base64Image: string) {
   }
 
   if (result) {
-    // Store in Cache API for future offline retrievals
+    
     await cacheSuccessfulResult(result);
     return result;
   }
 
-  // If all local/cloud pipelines failed, switch to dedicated Cache API instantly!
+ 
   console.log("⚠️ API Pipelines failed. Checking dedicated Cache API for pre-cached Fallback Mode...");
   const cachedFallback = await getCachedFallbackResult();
   if (cachedFallback) {
     return cachedFallback;
   }
 
-  // Ultimate fallback if nothing exists in Cache API to avoid generic error
+  
   console.log("⚠️ Cache API empty. Serving built-in offline smart fallback...");
   const fallbackMeta = DISEASE_METADATA["Healthy"];
   return {

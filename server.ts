@@ -13,10 +13,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // JSON body parser
+ 
   app.use(express.json({ limit: '10mb' }));
-
-  // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", service: "Tomato Leaf Engine" });
   });
@@ -28,7 +26,7 @@ async function startServer() {
         return res.status(400).json({ error: "Missing image data" });
       }
 
-      // Check if Python FastAPI server is running on port 8000 (DenseNet h5 model)
+      
       try {
         console.log("Checking if Python FastAPI backend is available on port 8000...");
         
@@ -105,7 +103,7 @@ async function startServer() {
         "reasoning": "Observed concentric rings with yellow halos on older leaves..."
       }`;
 
-      // Extract raw base64 data regardless of prefix
+      
       let rawBase64 = image;
       let mimeType = "image/jpeg";
       
@@ -159,7 +157,7 @@ async function startServer() {
     }
   });
 
-  // Vite middleware for development
+  
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

@@ -8,9 +8,6 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# ---------------------------------------------------------------------------
-# DISEASE METADATA
-# ---------------------------------------------------------------------------
 DISEASE_METADATA = {
     "Bacterial Spot": {
         "product": "Copper-based fungicides",
@@ -66,14 +63,10 @@ DISEASE_METADATA = {
 
 CLASS_NAMES = list(DISEASE_METADATA.keys())
 
-# ---------------------------------------------------------------------------
-# ALLOWED ORIGINS – tighten in production by listing specific origins
-# ---------------------------------------------------------------------------
+
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
-# ---------------------------------------------------------------------------
-# MODEL LOADING – uses lifespan context manager (on_event is deprecated)
-# ---------------------------------------------------------------------------
+
 MODEL_PATH = os.environ.get("MODEL_PATH", "tomato_densenet_model.h5")
 model = None
 model_status = "not_loaded"
@@ -100,9 +93,7 @@ async def lifespan(app: FastAPI):
     model = None
 
 
-# ---------------------------------------------------------------------------
-# APP
-# ---------------------------------------------------------------------------
+
 app = FastAPI(
     title="TomatoGuard – Tomato Leaf Disease Detector API",
     version="1.0.0",
@@ -113,15 +104,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=False,   # credentials not needed; set True only if using cookies
+    allow_credentials=False,   
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
 
 
-# ---------------------------------------------------------------------------
-# HELPERS
-# ---------------------------------------------------------------------------
 MAX_FILE_SIZE_MB = 10
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 
@@ -134,9 +122,7 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
     return np.expand_dims(arr, axis=0)
 
 
-# ---------------------------------------------------------------------------
-# ENDPOINTS
-# ---------------------------------------------------------------------------
+
 @app.get("/", summary="Health check")
 def read_root():
     return {
@@ -158,11 +144,11 @@ def health_check():
 
 @app.post("/predict", summary="Predict disease from leaf image")
 async def predict(file: UploadFile = File(...)):
-    # --- Validate content type ---
+    
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image (jpeg/png/webp).")
 
-    # --- Read file with size guard ---
+    
     try:
         data = await file.read()
     except Exception as e:
@@ -179,9 +165,9 @@ async def predict(file: UploadFile = File(...)):
 
     try:
         if model is None:
-            # Fallback: model not available – return a safe default
+            
             disease_name = "Healthy"
-            confidence = 0.50   # Low confidence signals fallback
+            confidence = 0.50   
             is_mock = True
         else:
             processed = preprocess_image(data)
@@ -208,9 +194,7 @@ async def predict(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 
 
-# ---------------------------------------------------------------------------
-# ENTRY POINT
-# ---------------------------------------------------------------------------
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))

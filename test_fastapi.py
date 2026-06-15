@@ -1,7 +1,4 @@
-"""
-FastAPI Backend Integration Test
-Tests all API endpoints with real HTTP requests
-"""
+
 import sys
 import io
 import json
@@ -30,7 +27,7 @@ def test_root():
 
 def create_minimal_jpeg():
     """Create a minimal valid JPEG as base64 for testing"""
-    # Minimal 1x1 white JPEG
+    
     from PIL import Image
     import io as _io
     img = Image.new("RGB", (224, 224), color=(100, 180, 100))
@@ -43,7 +40,7 @@ def test_predict_healthy():
     try:
         from PIL import Image
         import io as _io
-        img = Image.new("RGB", (224, 224), color=(50, 160, 50))  # Green
+        img = Image.new("RGB", (224, 224), color=(50, 160, 50))  
         buf = _io.BytesIO()
         img.save(buf, format="JPEG")
         image_bytes = buf.getvalue()

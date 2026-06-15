@@ -28,7 +28,7 @@
   }
 }
 
-/* Custom scrollbar to match theme */
+
 ::-webkit-scrollbar {
   width: 6px;
 }

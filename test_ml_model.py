@@ -1,9 +1,4 @@
-"""
-ML Model Validation Script - Handles Keras version compatibility issues
-The .h5 model was saved with TF 1.x/early TF 2.x naming conventions
-using '/' in layer names which TF 2.21 rejects.
-We fix this with custom_object_scope / compile=False.
-"""
+
 import os
 import sys
 import io
@@ -15,12 +10,12 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 print("=== ML MODEL VALIDATION SCRIPT ===")
 print("Python:", sys.version)
 
-# 1. TensorFlow import
+
 print("\n[1] Importing TensorFlow...")
 import tensorflow as tf
 print("OK: TensorFlow", tf.__version__, "loaded")
 
-# 2. Model file check
+
 MODEL_PATH = "tomato_densenet_model.h5"
 print("\n[2] Checking model file:", MODEL_PATH)
 if not os.path.exists(MODEL_PATH):
@@ -29,12 +24,11 @@ if not os.path.exists(MODEL_PATH):
 size_mb = os.path.getsize(MODEL_PATH) / (1024 * 1024)
 print("OK: Model file found:", round(size_mb, 1), "MB")
 
-# 3. Model loading - try multiple compatibility modes
 print("\n[3] Loading model...")
 model = None
 load_errors = []
 
-# Attempt 1: Standard load
+
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
     print("OK: Loaded with standard loader")
@@ -42,7 +36,7 @@ except Exception as e:
     load_errors.append("Standard: " + str(e)[:120])
     print("   Standard load failed:", str(e)[:120])
 
-# Attempt 2: compile=False (skip optimizer state)
+
 if model is None:
     try:
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)
@@ -51,7 +45,7 @@ if model is None:
         load_errors.append("compile=False: " + str(e)[:120])
         print("   compile=False failed:", str(e)[:120])
 
-# Attempt 3: h5py direct weights extraction + architecture rebuild
+
 if model is None:
     try:
         import h5py
@@ -72,10 +66,10 @@ if model is None:
     except Exception as e:
         print("   h5py inspection failed:", e)
 
-# Attempt 4: custom_object_scope hack  
+
 if model is None:
     try:
-        # Monkey-patch to allow slash in names temporarily
+       
         from keras import layers as keras_layers
         orig_init = keras_layers.Conv2D.__init__
         
@@ -97,7 +91,7 @@ if model is None:
         except:
             pass
 
-# Final verdict on loading
+
 if model is None:
     print("\nFAIL: All model loading attempts failed!")
     print("\nDiagnosis:")
@@ -117,7 +111,7 @@ if model is None:
     print("  This means the Python FastAPI backend will NOT provide real AI predictions.")
     sys.exit(2)
 
-# 4. Architecture check (only if loaded)
+
 print("\n[4] Model architecture:")
 input_shape = model.input_shape
 output_shape = model.output_shape
@@ -139,7 +133,7 @@ if num_classes == len(DISEASE_METADATA_KEYS):
 else:
     print("WARNING: Mismatch - class count differs by", abs(num_classes - len(DISEASE_METADATA_KEYS)))
 
-# Run inference tests
+
 def run_inference(name, img_array):
     try:
         tensor = np.expand_dims(img_array, axis=0)

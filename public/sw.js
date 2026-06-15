@@ -31,12 +31,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // We only intercept GET requests for static assets, models and UI pages
+ 
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // Skip chrome-extension or external APIs except necessary assets
+  
   if (!url.origin.startsWith(self.location.origin) && !url.href.includes('unsplash') && !url.href.includes('flaticon')) {
     return;
   }
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Return cached asset, fetch fresh in background for next time
+        
         fetch(event.request).then((freshResponse) => {
           if (freshResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, freshResponse));
@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
 
-        // Cache newly fetched assets dynamically (e.g., model.json)
+
         const responseToCache = response.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
@@ -66,7 +66,7 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       }).catch(() => {
-        // If query fails (offline mode/no connection) and requested model file is not found:
+        
         console.warn('👷 Service Worker: Network request failed for', event.request.url);
       });
     })
